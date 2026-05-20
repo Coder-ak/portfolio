@@ -1,43 +1,63 @@
-# Astro Starter Kit: Minimal
+# Terminal Portfolio
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Single-page portfolio built with Astro and styled as an interactive terminal.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Stack
 
-## 🚀 Project Structure
+- Astro
+- TypeScript
+- LESS
+- self-hosted JetBrains Mono font
 
-Inside of your Astro project, you'll see the following folders and files:
+## Features
+
+- mock-inspired terminal UI with macOS-style window chrome
+- startup sequence that pre-renders `whoami`, `skills --list`, `projects --public`, and `contact`
+- command input with history, tab autocomplete, clickable commands, and `clear`
+- content managed from one file: `src/data/portfolio.ts`
+- mobile-friendly layout with pinned input row
+
+## Project Structure
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/
+├── components/
+│   └── Terminal/
+│       ├── Terminal.astro
+│       ├── TerminalBody.astro
+│       ├── renderer.ts
+│       ├── terminal.client.ts
+│       └── terminal.module.less
+├── data/
+│   └── portfolio.ts
+├── layouts/
+│   └── Base.astro
+├── pages/
+│   └── index.astro
+└── styles/
+    ├── global.less
+    ├── reset.less
+    └── variables.less
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Commands
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- `npm install` installs dependencies
+- `npm run dev` starts the local dev server
+- `npm run build` builds the production site into `dist/`
+- `npm run preview` previews the built site
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Content Updates
 
-## 🧞 Commands
+Edit `src/data/portfolio.ts` to update:
 
-All commands are run from the root of the project, from a terminal:
+- profile summary
+- startup commands
+- skills and bar values
+- projects and drill-down content
+- contact links
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Notes
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- the bundled font is loaded from `public/fonts/JetBrainsMono.woff2`
+- `linkedin` and `email` are still placeholders until real values are added

@@ -1,0 +1,36 @@
+@import './reset.less';
+@import './variables.less';
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('/fonts/JetBrainsMono.woff2') format('woff2');
+	font-weight: 100 800;
+	font-style: normal;
+	font-display: swap;
+}
+
+html,
+body {
+	min-height: 100%;
+	background-color: @color-bg;
+	color: @color-text-primary;
+	font-family: @font-mono;
+	font-size: @font-size-terminal;
+	line-height: @line-height-terminal;
+	-webkit-font-smoothing: antialiased;
+}
+
+body {
+	background:
+		radial-gradient(circle at top, fadeout(@color-blue, 90%), transparent 32%),
+		@color-bg;
+}
+
+::selection {
+	background: fadeout(@color-blue, 70%);
+}
+
+:focus-visible {
+	outline: 2px solid @color-blue;
+	outline-offset: 2px;
+}

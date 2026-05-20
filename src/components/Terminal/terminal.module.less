@@ -1,0 +1,321 @@
+@import '../../styles/variables.less';
+
+.terminalWindow {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-width: @terminal-max-width;
+	height: min(680px, calc(100dvh - 4rem));
+	min-height: @terminal-min-height;
+	border: 1px solid @color-border;
+	border-radius: @terminal-radius;
+	overflow: hidden;
+	background: @color-bg;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+
+	@media (max-width: 640px) {
+		max-width: none;
+		height: 100dvh;
+		min-height: 100dvh;
+		border-radius: 0;
+		border-inline: 0;
+		border-bottom: 0;
+	}
+}
+
+.terminalTitlebar {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	height: @terminal-titlebar-height;
+	padding: 0 14px;
+	background: @color-surface;
+	border-bottom: 1px solid @color-border;
+	user-select: none;
+}
+
+.terminalDots {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.terminalDot {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+}
+
+.terminalDotRed {
+	background: #ff5f57;
+}
+
+.terminalDotYellow {
+	background: #ffbd2e;
+}
+
+.terminalDotGreen {
+	background: #27c93f;
+}
+
+.terminalTitle {
+	flex: 1;
+	padding-right: 56px;
+	font-size: 11px;
+	text-align: center;
+	color: @color-text-muted;
+}
+
+.terminalBody {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	background: @color-bg;
+}
+
+.terminalOutput {
+	flex: 1;
+	min-height: 0;
+	padding: @terminal-padding;
+	overflow-y: auto;
+	scroll-behavior: smooth;
+	scrollbar-width: thin;
+	scrollbar-color: @color-border transparent;
+}
+
+.terminalOutput::-webkit-scrollbar {
+	width: 6px;
+}
+
+.terminalOutput::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.terminalOutput::-webkit-scrollbar-thumb {
+	border-radius: 3px;
+	background: @color-border;
+}
+
+.cmdOutput {
+	margin-bottom: 4px;
+}
+
+.outLine {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.outGap {
+	height: 6px;
+}
+
+.outPrimary {
+	color: @color-text-primary;
+}
+
+.outSecondary {
+	color: @color-text-secondary;
+}
+
+.outMuted {
+	color: @color-text-muted;
+}
+
+.outGreen {
+	color: @color-green;
+}
+
+.outBlue {
+	color: @color-blue;
+}
+
+.outYellow {
+	color: @color-yellow;
+}
+
+.outRed {
+	color: @color-red;
+}
+
+.outCyan {
+	color: @color-cyan;
+}
+
+.outLink {
+	display: inline;
+	min-height: 32px;
+	color: @color-link;
+	cursor: pointer;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	transition: color @transition-fast;
+
+	&:hover,
+	&:focus-visible {
+		color: @color-link-hover;
+	}
+}
+
+.promptLine {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.promptLabelText {
+	margin-right: 0.7ch;
+	color: @color-text-muted;
+}
+
+.promptCommand {
+	color: @color-green;
+}
+
+.outEntry {
+	display: grid;
+	grid-template-columns: minmax(154px, auto) 1fr;
+	column-gap: 16px;
+
+	@media (max-width: 560px) {
+		grid-template-columns: 1fr;
+		column-gap: 0;
+	}
+}
+
+.outSkill {
+	display: grid;
+	grid-template-columns: 92px minmax(0, 1fr) 48px;
+	align-items: center;
+	column-gap: 14px;
+
+	@media (max-width: 520px) {
+		grid-template-columns: 92px minmax(0, 1fr) 44px;
+		column-gap: 10px;
+	}
+}
+
+.skillName {
+	color: @color-text-secondary;
+}
+
+.skillCommand {
+	color: @color-text-primary;
+	cursor: pointer;
+	text-decoration: underline;
+	text-decoration-color: fadeout(@color-link, 45%);
+	text-underline-offset: 2px;
+	transition: color @transition-fast;
+
+	&:hover,
+	&:focus-visible {
+		color: @color-link-hover;
+		text-decoration-color: @color-link-hover;
+	}
+}
+
+.skillYears {
+	color: @color-text-muted;
+	text-align: right;
+}
+
+.gauge {
+	position: relative;
+	display: block;
+	height: @gauge-height;
+	border-radius: @gauge-radius;
+	background: @color-gauge-track;
+	overflow: hidden;
+	box-shadow: inset 0 0 0 1px fadeout(@color-blue, 92%);
+}
+
+.gaugeFill {
+	display: block;
+	height: 100%;
+	border-radius: inherit;
+}
+
+.gaugeFillGreen {
+	background: linear-gradient(90deg, lighten(@color-green, 4%), @color-green);
+}
+
+.gaugeFillBlue {
+	background: linear-gradient(90deg, lighten(@color-blue, 4%), @color-blue);
+}
+
+.gaugeFillYellow {
+	background: linear-gradient(90deg, lighten(@color-yellow, 4%), #f2cc60);
+}
+
+.outProject {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+}
+
+.projectArrow {
+	margin-right: 8px;
+}
+
+.contactRow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+}
+
+.contactLink,
+.contactText {
+	color: @color-contact-link;
+}
+
+.contactLink {
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	transition: color @transition-fast;
+
+	&:hover,
+	&:focus-visible {
+		color: @color-contact-link-hover;
+	}
+}
+
+.terminalInputRow {
+	display: flex;
+	align-items: center;
+	gap: 0.7ch;
+	padding: @terminal-padding;
+	padding-top: 0;
+	flex-shrink: 0;
+
+	@media (max-width: 640px) {
+		position: sticky;
+		bottom: 0;
+		background: @color-bg;
+	}
+}
+
+.terminalPromptLabel {
+	flex-shrink: 0;
+	color: @color-text-muted;
+}
+
+.terminalInput {
+	flex: 1;
+	border: none;
+	outline: none;
+	background: transparent;
+	color: @color-text-primary;
+	font-family: @font-mono;
+	font-size: @font-size-terminal;
+	line-height: @line-height-terminal;
+	caret-color: @color-green;
+
+	&::placeholder {
+		color: @color-text-invisible;
+		opacity: .5;
+	}
+
+	&:disabled {
+		opacity: 0.5;
+	}
+}
