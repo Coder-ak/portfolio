@@ -23,10 +23,6 @@ export const helpEntries = [
 	{ cmd: 'projects --public', desc: 'public work and drill-down commands' },
 	{ cmd: 'projects --private', desc: 'private work summary' },
 	{ cmd: 'contact', desc: 'social and contact links' },
-	{ cmd: 'ls', desc: 'list fake portfolio files' },
-	{ cmd: 'pwd', desc: 'print fake working directory' },
-	{ cmd: 'cd ..', desc: 'pretend to navigate the filesystem' },
-	{ cmd: 'rm -rf node_modules', desc: 'dramatic but harmless refusal' },
 	{ cmd: 'clear', desc: 'clear terminal output' },
 ];
 
