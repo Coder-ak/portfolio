@@ -77,12 +77,20 @@
 
 .terminalOutput {
 	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
 	min-height: 0;
 	padding: @terminal-padding;
 	overflow-y: auto;
 	scroll-behavior: smooth;
 	scrollbar-width: thin;
 	scrollbar-color: @color-border transparent;
+}
+
+.terminalHistory {
+	flex: 0 0 auto;
+	min-height: 0;
 }
 
 .terminalOutput::-webkit-scrollbar {
@@ -145,7 +153,6 @@
 
 .outLink {
 	display: inline;
-	min-height: 32px;
 	color: @color-link;
 	cursor: pointer;
 	text-decoration: underline;
@@ -161,6 +168,8 @@
 .promptLine {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: baseline;
+	min-height: calc(@font-size-terminal * @line-height-terminal);
 }
 
 .promptLabelText {
@@ -217,6 +226,7 @@
 .skillYears {
 	color: @color-text-muted;
 	text-align: right;
+	white-space: nowrap;
 }
 
 .gauge {
@@ -283,36 +293,37 @@
 	display: flex;
 	align-items: center;
 	gap: 0.7ch;
-	padding: @terminal-padding;
-	padding-top: 0;
+	flex-wrap: wrap;
+	align-items: baseline;
+	min-height: calc(@font-size-terminal * @line-height-terminal);
 	flex-shrink: 0;
+}
 
-	@media (max-width: 640px) {
-		position: sticky;
-		bottom: 0;
-		background: @color-bg;
-	}
+.terminalInputRowHidden {
+	visibility: hidden;
 }
 
 .terminalPromptLabel {
 	flex-shrink: 0;
-	color: @color-text-muted;
+	color: @color-text-prompt;
 }
 
 .terminalInput {
 	flex: 1;
 	border: none;
 	outline: none;
+	margin: 0;
+	padding: 0;
 	background: transparent;
 	color: @color-text-primary;
 	font-family: @font-mono;
 	font-size: @font-size-terminal;
-	line-height: @line-height-terminal;
+	line-height: inherit;
 	caret-color: @color-green;
 
 	&::placeholder {
-		color: @color-text-invisible;
-		opacity: .5;
+		color: @color-text-muted;
+		opacity: 0.35;
 	}
 
 	&:disabled {

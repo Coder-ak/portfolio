@@ -11,7 +11,7 @@ Single-page portfolio built with Astro and styled as an interactive terminal.
 
 ## Features
 
-- mock-inspired terminal UI with macOS-style window chrome
+- terminal UI with macOS-style window decorations
 - startup sequence that pre-renders `whoami`, `skills --list`, `projects --public`, and `contact`
 - command input with history, tab autocomplete, clickable commands, and `clear`
 - content managed from one file: `src/data/portfolio.ts`
@@ -59,5 +59,3 @@ Edit `src/data/portfolio.ts` to update:
 
 ## Notes
 
-- the bundled font is loaded from `public/fonts/JetBrainsMono.woff2`
-- `linkedin` and `email` are still placeholders until real values are added

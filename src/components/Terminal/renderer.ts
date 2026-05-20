@@ -47,6 +47,18 @@ function renderContact(contact: ContactLink): string {
 	return `<span class="${styles.contactText}">${escapeHtml(contact.value)}</span>`;
 }
 
+function toRepoHref(text: string): string {
+	if (/^https?:\/\//.test(text)) {
+		return text;
+	}
+
+	if (text.startsWith('github.com/')) {
+		return `https://${text}`;
+	}
+
+	return text;
+}
+
 export function renderLines(lines: OutputLine[]): string {
 	return lines
 		.map((line) => {
@@ -60,6 +72,13 @@ export function renderLines(lines: OutputLine[]): string {
 						`<div class="${styles.outLine} ${styles.outEntry}">`,
 						`<span class="${styles.outLink}" data-cmd="${escapeHtml(line.cmd)}" tabindex="0" role="button">${escapeHtml(line.cmd)}</span>`,
 						`<span class="${styles.outSecondary}">${escapeHtml(line.desc)}</span>`,
+						'</div>',
+					].join('');
+				case 'repo':
+					return [
+						`<div class="${styles.outLine} ${COLOR_CLASS[line.color ?? 'secondary']}">`,
+						line.label ? `${escapeHtml(line.label)} ` : '',
+						`<a class="${styles.outLink}" href="${escapeHtml(toRepoHref(line.text))}" target="_blank" rel="noreferrer noopener">${escapeHtml(line.text)}</a>`,
 						'</div>',
 					].join('');
 				case 'skill':

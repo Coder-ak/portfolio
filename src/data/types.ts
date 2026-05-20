@@ -39,6 +39,7 @@ export type OutputLine =
 	| { t: 'text'; color: LineColor; v: string }
 	| { t: 'gap' }
 	| { t: 'entry'; cmd: string; desc: string }
+	| { t: 'repo'; label?: string; text: string; color?: LineColor }
 	| { t: 'skill'; skill: Skill }
 	| { t: 'project'; project: Project }
 	| { t: 'contact'; contact: ContactLink }

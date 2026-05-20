@@ -6,26 +6,29 @@ import styles from './terminal.module.less';
 <div class={styles.terminalBody}>
 	<div
 		class={styles.terminalOutput}
-		id="terminal-output"
-		role="log"
-		aria-live="polite"
-		aria-label="Terminal output"
-	></div>
-
-	<label class={styles.terminalInputRow} for="terminal-input">
-		<span class={styles.terminalPromptLabel} aria-hidden="true">{`${profile.handle}@${profile.host}:~$`}</span>
-		<input
-			id="terminal-input"
-			class={styles.terminalInput}
-			type="text"
-			autocomplete="off"
-			autocorrect="off"
-			autocapitalize="off"
-			spellcheck="false"
-			placeholder="type help"
-			aria-label="Terminal command input"
-		/>
-	</label>
+		id="terminal-scroll"
+	>
+		<div
+			class={styles.terminalHistory}
+			id="terminal-output"
+			role="log"
+			aria-live="polite"
+			aria-label="Terminal output"
+		></div>
+		<label class={styles.terminalInputRow} id="terminal-input-row" for="terminal-input">
+			<span class={styles.terminalPromptLabel} id="terminal-prompt-label" aria-hidden="true">{`${profile.handle}@${profile.host}:~$`}</span>
+			<input
+				id="terminal-input"
+				class={styles.terminalInput}
+				type="text"
+				autocomplete="off"
+				autocorrect="off"
+				autocapitalize="off"
+				spellcheck="false"
+				aria-label="Terminal command input"
+			/>
+		</label>
+	</div>
 </div>
 
 <script>

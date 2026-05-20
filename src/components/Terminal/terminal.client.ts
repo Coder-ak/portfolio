@@ -39,8 +39,25 @@ const commands: Record<string, CommandFn> = {
 			v: `${profile.role} · ${profile.experience} · ${profile.location}`,
 		},
 	],
+	projects: () => [
+		{ t: 'entry', cmd: 'projects --public', desc: 'public case studies and drill-down commands' },
+		{ t: 'entry', cmd: 'projects --private', desc: 'private / NDA work summary' },
+	],
 	'skills --list': () => skills.map((skill) => ({ t: 'skill', skill }) as const),
 	'projects --public': () => projects.map((project) => ({ t: 'project', project }) as const),
+	'projects --private': () => [
+		{ t: 'text', color: 'yellow', v: 'private projects' },
+		{ t: 'gap' },
+		{ t: 'text', color: 'muted', v: '  multiple commercial projects are under NDA' },
+		{ t: 'text', color: 'muted', v: '  can discuss architecture, responsibility, and outcomes in a real conversation' },
+	],
+	ls: () => [
+		{ t: 'text', color: 'blue', v: 'projects  skills  contact  README.md  deploy.log  secrets.txt' },
+		{ t: 'text', color: 'muted', v: 'secrets.txt is a lie' },
+	],
+	pwd: () => [
+		{ t: 'text', color: 'secondary', v: '/home/coder/portfolio' },
+	],
 	contact: () => [
 		{
 			t: 'raw',
@@ -65,22 +82,55 @@ const commands: Record<string, CommandFn> = {
 
 const allCommands = Object.keys(commands).sort();
 const promptLabel = `${profile.handle}@${profile.host}:~$`;
+const sudoPromptLabel = `[sudo] password for ${profile.handle}:`;
+const suPromptLabel = 'Password:';
+const defaultPlaceholder = 'type help';
 
 let history: string[] = [];
 let historyIndex = -1;
 let isBusy = false;
+let pendingSudoCommand: string | null = null;
+let pendingSuUser: string | null = null;
 
 function getOutput(): HTMLElement {
 	return document.getElementById('terminal-output') as HTMLElement;
+}
+
+function getScrollContainer(): HTMLElement {
+	return document.getElementById('terminal-scroll') as HTMLElement;
 }
 
 function getInput(): HTMLInputElement {
 	return document.getElementById('terminal-input') as HTMLInputElement;
 }
 
+function getPromptLabel(): HTMLElement {
+	return document.getElementById('terminal-prompt-label') as HTMLElement;
+}
+
+function getInputRow(): HTMLElement {
+	return document.getElementById('terminal-input-row') as HTMLElement;
+}
+
+function setInteractivePromptVisible(isVisible: boolean): void {
+	const inputRow = getInputRow();
+	inputRow.classList.toggle(styles.terminalInputRowHidden, !isVisible);
+}
+
+function setActivePrompt(options?: { isSudo?: boolean; isSu?: boolean }): void {
+	const input = getInput();
+	const prompt = getPromptLabel();
+	const isSudo = options?.isSudo ?? false;
+	const isSu = options?.isSu ?? false;
+
+	prompt.textContent = isSudo ? sudoPromptLabel : isSu ? suPromptLabel : promptLabel;
+	input.type = isSudo || isSu ? 'password' : 'text';
+	input.placeholder = isSudo || isSu ? '' : defaultPlaceholder;
+}
+
 function scrollToBottom(): void {
-	const output = getOutput();
-	output.scrollTop = output.scrollHeight;
+	const container = getScrollContainer();
+	container.scrollTop = container.scrollHeight;
 }
 
 function appendOutput(lines: OutputLine[]): void {
@@ -140,6 +190,36 @@ function executeCommand(rawCommand: string, options: { addToHistory?: boolean } 
 		return;
 	}
 
+	if (command.startsWith('sudo ')) {
+		pendingSudoCommand = command.slice(5).trim() || '';
+		setActivePrompt({ isSudo: true });
+		return;
+	}
+
+	if (command.startsWith('su ')) {
+		pendingSuUser = command.slice(3).trim() || 'root';
+		setActivePrompt({ isSu: true });
+		return;
+	}
+
+	if (command === 'cd' || command.startsWith('cd ')) {
+		const target = command.slice(2).trim() || '~';
+		appendOutput([
+			{ t: 'text', color: 'yellow', v: `cd: ${target}` },
+			{ t: 'text', color: 'muted', v: '  nice try. this terminal is immutable by design.' },
+		]);
+		return;
+	}
+
+	if (command === 'rm' || command.startsWith('rm ')) {
+		const target = command.slice(2).trim();
+		appendOutput([
+			{ t: 'text', color: 'red', v: `rm: ${target}` },
+			{ t: 'text', color: 'muted', v: '  cannot delete: permissions not granted. try with sudo.' },
+		]);
+		return;
+	}
+
 	const fn = commands[command];
 	if (fn) {
 		appendOutput(fn());
@@ -160,12 +240,37 @@ function executeCommand(rawCommand: string, options: { addToHistory?: boolean } 
 }
 
 function handleEnter(input: HTMLInputElement): void {
-	const command = input.value.trim();
-	if (!command) {
+	const value = input.value;
+	const command = value.trim();
+	if (!command && !pendingSudoCommand) {
 		return;
 	}
 
 	input.value = '';
+
+	if (pendingSudoCommand) {
+		appendPromptLine(sudoPromptLabel);
+		appendOutput([
+			{ t: 'text', color: 'red', v: 'Sorry, try again.' },
+			{ t: 'text', color: 'muted', v: 'sudo: 1 incorrect password attempt' },
+			{ t: 'text', color: 'muted', v: 'This incident will be reported.' },
+		]);
+		pendingSudoCommand = null;
+		setActivePrompt();
+		return;
+	}
+
+	if (pendingSuUser) {
+		appendPromptLine(suPromptLabel);
+		appendOutput([
+			{ t: 'text', color: 'red', v: 'su: Authentication failure' },
+			{ t: 'text', color: 'muted', v: `su: incorrect password for ${pendingSuUser}` },
+		]);
+		pendingSuUser = null;
+		setActivePrompt();
+		return;
+	}
+
 	appendPromptLine(command);
 	executeCommand(command, { addToHistory: true });
 }
@@ -235,12 +340,14 @@ async function typeAndRun(command: string): Promise<void> {
 	isBusy = true;
 	const input = getInput();
 	input.disabled = true;
+	setInteractivePromptVisible(false);
 
 	const promptLine = appendPromptLine('');
 	const promptCommand = promptLine.querySelector(`.${styles.promptCommand}`);
 	if (!(promptCommand instanceof HTMLElement)) {
 		isBusy = false;
 		input.disabled = false;
+		setInteractivePromptVisible(true);
 		return;
 	}
 
@@ -253,6 +360,8 @@ async function typeAndRun(command: string): Promise<void> {
 	await sleep(180);
 	executeCommand(command);
 	input.disabled = false;
+	setInteractivePromptVisible(true);
+	setActivePrompt();
 	input.focus();
 	isBusy = false;
 }
@@ -261,6 +370,8 @@ async function boot(): Promise<void> {
 	isBusy = true;
 	const input = getInput();
 	input.disabled = true;
+	setInteractivePromptVisible(false);
+	setActivePrompt();
 
 	for (const command of startupCommands) {
 		appendPromptLine(command);
@@ -269,6 +380,8 @@ async function boot(): Promise<void> {
 	}
 
 	input.disabled = false;
+	setInteractivePromptVisible(true);
+	setActivePrompt();
 	input.focus();
 	isBusy = false;
 }
@@ -276,6 +389,7 @@ async function boot(): Promise<void> {
 export function initTerminal(): void {
 	const input = getInput();
 	const output = getOutput();
+	setActivePrompt();
 
 	input.addEventListener('keydown', (event) => {
 		if (isBusy && event.key !== 'Tab') {
