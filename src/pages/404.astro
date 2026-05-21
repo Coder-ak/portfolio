@@ -1,0 +1,175 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="404 :: terminal not found" description="Broken terminal page for a missing route." noIndex={true}>
+	<main class="not-found-shell">
+		<section class="crash-terminal" aria-label="404 terminal">
+			<header class="crash-titlebar" aria-hidden="true">
+				<div class="crash-dots">
+					<span class="crash-dot crash-dot--red"></span>
+					<span class="crash-dot crash-dot--yellow"></span>
+					<span class="crash-dot crash-dot--green"></span>
+				</div>
+				<span class="crash-title">coder@portfolio ~ / lost+found</span>
+			</header>
+
+			<div class="crash-body">
+				<pre class="crash-art" aria-hidden="true">
+    ________________________________
+   / .----------------------------. \
+  / /                              \ \
+ | |      4 0 4 :: signal lost      | |
+ | |      ____________________      | |
+ | |     |  page not found    |     | |
+ | |     |  cursor desynced   |     | |
+ | |     |  route unplugged   |     | |
+ | |     |____________________|     | |
+ | |             \   ^__^           | |
+ | |              \  (xx)\_______   | |
+ | |                 (__)\       )\/\ |
+ | |                     ||----w |    ||
+ | |                     ||     ||    ||
+  \ \                              / /
+   \ '----------------------------' /
+    '------------------------------'
+				</pre>
+
+				<div class="crash-lines" role="presentation">
+					<p><span class="prompt">coder@portfolio:~$</span> open /missing/route</p>
+					<p class="error">bash: /missing/route: no such file or directory</p>
+					<p><span class="prompt">coder@portfolio:~$</span> diagnose --page</p>
+					<p class="muted">route map returned status 404</p>
+					<p class="muted">best next move: return to a known path</p>
+					<p><span class="prompt">coder@portfolio:~$</span> <a href="/">cd /home/coder/portfolio</a></p>
+				</div>
+			</div>
+		</section>
+	</main>
+</Base>
+
+<style lang="less">
+	@import '../styles/variables.less';
+
+	.not-found-shell {
+		display: grid;
+		min-height: 100dvh;
+		padding: 2rem 1rem;
+		place-items: center;
+	}
+
+	.crash-terminal {
+		width: min(100%, 760px);
+		border: 1px solid @color-border;
+		border-radius: @terminal-radius;
+		overflow: hidden;
+		background: @color-bg;
+		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+	}
+
+	.crash-titlebar {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		height: @terminal-titlebar-height;
+		padding: 0 14px;
+		background: @color-surface;
+		border-bottom: 1px solid @color-border;
+	}
+
+	.crash-dots {
+		display: flex;
+		gap: 8px;
+	}
+
+	.crash-dot {
+		width: 11px;
+		height: 11px;
+		border-radius: 50%;
+
+		&--red {
+			background: #ff5f57;
+		}
+
+		&--yellow {
+			background: #ffbd2e;
+		}
+
+		&--green {
+			background: #27c93f;
+		}
+	}
+
+	.crash-title {
+		flex: 1;
+		padding-right: 56px;
+		font-size: 11px;
+		text-align: center;
+		color: @color-text-muted;
+	}
+
+	.crash-body {
+		padding: 20px;
+		background:
+			radial-gradient(circle at top right, fadeout(@color-red, 92%), transparent 26%),
+			radial-gradient(circle at bottom left, fadeout(@color-blue, 92%), transparent 28%),
+			@color-bg;
+	}
+
+	.crash-art {
+		margin: 0 0 1.25rem;
+		overflow-x: auto;
+		color: @color-text-secondary;
+		font-family: @font-mono;
+		font-size: 12px;
+		line-height: 1.35;
+	}
+
+	.crash-lines {
+		display: grid;
+		gap: 0.35rem;
+	}
+
+	.crash-lines p {
+		margin: 0;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+
+	.prompt {
+		margin-right: 0.7ch;
+		color: @color-text-muted;
+	}
+
+	.error {
+		color: @color-red;
+	}
+
+	.muted {
+		color: @color-text-secondary;
+	}
+
+	.crash-lines a {
+		color: @color-link;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+
+		&:hover,
+		&:focus-visible {
+			color: @color-link-hover;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.not-found-shell {
+			padding: 0;
+		}
+
+		.crash-terminal {
+			min-height: 100dvh;
+			border-radius: 0;
+			border-inline: 0;
+			border-bottom: 0;
+		}
+	}
+</style>

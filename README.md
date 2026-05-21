@@ -59,3 +59,8 @@ Edit `src/data/portfolio.ts` to update:
 
 ## Notes
 
+- set `siteUrl` in `src/data/seo.ts` to enable canonical URLs and a sitemap reference in `robots.txt`
+
+## License
+
+This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.

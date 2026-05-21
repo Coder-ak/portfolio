@@ -1,9 +1,15 @@
 ---
+import { seo } from '../data/seo';
+
 interface Props {
 	title?: string;
+	description?: string;
+	noIndex?: boolean;
 }
 
-const { title = 'coder@portfolio' } = Astro.props;
+const { title = seo.defaultTitle, description = seo.defaultDescription, noIndex = false } = Astro.props;
+const canonicalUrl = seo.siteUrl ? new URL(Astro.url.pathname, seo.siteUrl).toString() : undefined;
+const ogImageUrl = seo.siteUrl ? new URL(seo.ogImage, seo.siteUrl).toString() : undefined;
 ---
 
 <!doctype html>
@@ -11,11 +17,21 @@ const { title = 'coder@portfolio' } = Astro.props;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta
-			name="description"
-			content="Terminal-style portfolio for a senior software engineer focused on Angular, TypeScript, Node.js, and Linux."
-		/>
+		<meta name="description" content={description} />
+		<meta name="robots" content={noIndex ? 'noindex,nofollow' : 'index,follow'} />
+		<meta name="theme-color" content={seo.themeColor} />
 		<title>{title}</title>
+		{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:site_name" content={seo.siteName} />
+		{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+		{ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+		<meta name="twitter:card" content={seo.twitterCard} />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		{ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 	</head>
