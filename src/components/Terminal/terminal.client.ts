@@ -1,10 +1,14 @@
 import { contacts, helpEntries, profile, projects, skills, startupCommands } from '../../data/portfolio';
 import { formatYearsSince } from '../../data/formatters';
-import type { OutputLine } from '../../data/types';
+import { DEFAULT_LOCALE, resolveText } from '../../data/i18n';
+import type { Locale, OutputLine } from '../../data/types';
 import { renderLines } from './renderer';
 import styles from './terminal.module.less';
 
 type CommandFn = () => OutputLine[];
+type SessionEntry =
+	| { kind: 'prompt'; label: string; command: string }
+	| { kind: 'output'; lines: OutputLine[] };
 
 const skillDetailCommands = Object.fromEntries(
 	skills.map((skill) => [
@@ -13,69 +17,47 @@ const skillDetailCommands = Object.fromEntries(
 			skill.details ?? [
 				{ t: 'text', color: skill.color, v: skill.name },
 				{ t: 'gap' },
-				{ t: 'text', color: 'secondary', v: `  years shown: ${formatYearsSince(skill.since)}` },
-				...(skill.note ? [{ t: 'text', color: 'muted', v: `  note: ${skill.note}` } as const] : []),
-				{ t: 'text', color: 'muted', v: `  since: ${skill.since}` },
+				{ t: 'text', color: 'secondary', v: { en: `  years shown: ${formatYearsSince(skill.since)}`, ua: `  показано років: ${formatYearsSince(skill.since)}` } },
+				...(skill.note ? [{ t: 'text', color: 'muted', v: { en: `  note: ${resolveText(skill.note, 'en')}`, ua: `  примітка: ${resolveText(skill.note, 'ua')}` } } as const] : []),
+				{ t: 'text', color: 'muted', v: { en: `  since: ${skill.since}`, ua: `  з: ${skill.since}` } },
 			],
 	]),
 ) satisfies Record<string, CommandFn>;
 
 const projectDetailCommands = Object.fromEntries(
-	projects.map((project) => {
-		const detailLines: OutputLine[] = [...project.details];
-
-		return [project.id, () => detailLines];
-	}),
+	projects.map((project) => [project.id, () => [...project.details]]),
 ) satisfies Record<string, CommandFn>;
 
 const commands: Record<string, CommandFn> = {
-	help: () => [
-		...helpEntries.map((entry) => ({ t: 'entry', cmd: entry.cmd, desc: entry.desc }) as const),
-	],
+	help: () => helpEntries.map((entry) => ({ t: 'entry', cmd: entry.cmd, desc: entry.desc }) as const),
 	whoami: () => [
 		{
 			t: 'text',
 			color: 'primary',
-			v: `${profile.role} · ${profile.experience} · ${profile.location}`,
+			v: {
+				en: `${resolveText(profile.role, 'en')} · ${resolveText(profile.experience, 'en')} · ${resolveText(profile.location, 'en')}`,
+				ua: `${resolveText(profile.role, 'ua')} · ${resolveText(profile.experience, 'ua')} · ${resolveText(profile.location, 'ua')}`,
+			},
 		},
 	],
 	projects: () => [
-		{ t: 'entry', cmd: 'projects --public', desc: 'public case studies and drill-down commands' },
-		{ t: 'entry', cmd: 'projects --private', desc: 'private / NDA work summary' },
+		{ t: 'entry', cmd: 'projects --public', desc: { en: 'public case studies and drill-down commands', ua: 'публічні кейси та команди для деталей' } },
+		{ t: 'entry', cmd: 'projects --private', desc: { en: 'private / NDA work summary', ua: 'приватні / NDA проєкти коротко' } },
 	],
 	'skills --list': () => skills.map((skill) => ({ t: 'skill', skill }) as const),
 	'projects --public': () => projects.map((project) => ({ t: 'project', project }) as const),
 	'projects --private': () => [
-		{ t: 'text', color: 'yellow', v: 'private projects' },
+		{ t: 'text', color: 'yellow', v: { en: 'private projects', ua: 'приватні проєкти' } },
 		{ t: 'gap' },
-		{ t: 'text', color: 'muted', v: '  multiple commercial projects are under NDA' },
-		{ t: 'text', color: 'muted', v: '  can discuss architecture, responsibility, and outcomes in a real conversation' },
+		{ t: 'text', color: 'muted', v: { en: '  multiple commercial projects are under NDA', ua: '  кілька комерційних проєктів знаходяться під NDA' } },
+		{ t: 'text', color: 'muted', v: { en: '  can discuss architecture, responsibility, and outcomes in a real conversation', ua: '  можу обговорити архітектуру, відповідальність і результати в реальній розмові' } },
 	],
 	ls: () => [
 		{ t: 'text', color: 'blue', v: 'projects  skills  contact  README.md  deploy.log  secrets.txt' },
-		{ t: 'text', color: 'muted', v: 'secrets.txt is a lie' },
+		{ t: 'text', color: 'muted', v: { en: 'secrets.txt is a lie', ua: 'secrets.txt бреше' } },
 	],
-	pwd: () => [
-		{ t: 'text', color: 'secondary', v: '/home/coder/portfolio' },
-	],
-	contact: () => [
-		{
-			t: 'raw',
-			html: [
-				`<div class="${styles.outLine} ${styles.contactRow}">`,
-				contacts
-					.map((contact, index) => {
-						const separator = index === 0 ? '' : `<span class="${styles.outSecondary}"> / </span>`;
-						const content = contact.href
-							? `<a class="${styles.contactLink}" href="${contact.href}" target="_blank" rel="noreferrer noopener">${contact.value}</a>`
-							: `<span class="${styles.contactText}">${contact.value}</span>`;
-						return `${separator}${content}`;
-					})
-					.join(''),
-				'</div>',
-			].join(''),
-		},
-	],
+	pwd: () => [{ t: 'text', color: 'secondary', v: '/home/coder/portfolio' }],
+	contact: () => [{ t: 'contacts', contacts }],
 	...skillDetailCommands,
 	...projectDetailCommands,
 };
@@ -85,12 +67,15 @@ const promptLabel = `${profile.handle}@${profile.host}:~$`;
 const sudoPromptLabel = `[sudo] password for ${profile.handle}:`;
 const suPromptLabel = 'Password:';
 const defaultPlaceholder = 'type help';
+const localeStorageKey = 'portfolio-locale';
 
 let history: string[] = [];
 let historyIndex = -1;
 let isBusy = false;
 let pendingSudoCommand: string | null = null;
 let pendingSuUser: string | null = null;
+let currentLocale: Locale = DEFAULT_LOCALE;
+let sessionEntries: SessionEntry[] = [];
 
 function getOutput(): HTMLElement {
 	return document.getElementById('terminal-output') as HTMLElement;
@@ -112,9 +97,55 @@ function getInputRow(): HTMLElement {
 	return document.getElementById('terminal-input-row') as HTMLElement;
 }
 
+function getLocaleToggle(): HTMLButtonElement | null {
+	return document.getElementById('locale-toggle') as HTMLButtonElement | null;
+}
+
+function getLocaleRoot(): HTMLElement | null {
+	return document.getElementById('locale-toggle-root');
+}
+
+function renderPromptEntry(entry: Extract<SessionEntry, { kind: 'prompt' }>): string {
+	return [
+		`<div class="${styles.outLine} ${styles.promptLine}">`,
+		`<span class="${styles.promptLabelText}">${entry.label}</span>`,
+		`<span class="${styles.promptCommand}">${entry.command}</span>`,
+		'</div>',
+	].join('');
+}
+
+function renderSession(): void {
+	const output = getOutput();
+	output.innerHTML = sessionEntries
+		.map((entry) => (entry.kind === 'prompt' ? renderPromptEntry(entry) : `<div class="${styles.cmdOutput}">${renderLines(entry.lines, currentLocale)}</div>`))
+		.join('');
+}
+
+function syncLocaleUI(): void {
+	document.documentElement.lang = currentLocale === 'ua' ? 'uk' : 'en';
+	const toggle = getLocaleToggle();
+	const root = getLocaleRoot();
+
+	if (toggle) {
+		toggle.setAttribute('aria-pressed', String(currentLocale === 'ua'));
+		toggle.setAttribute('aria-label', currentLocale === 'ua' ? 'Switch language to English' : 'Перемкнути мову на українську');
+	}
+
+	if (root) {
+		root.dataset.locale = currentLocale;
+	}
+}
+
+function setLocale(locale: Locale): void {
+	currentLocale = locale;
+	window.localStorage.setItem(localeStorageKey, locale);
+	syncLocaleUI();
+	renderSession();
+	scrollToBottom();
+}
+
 function setInteractivePromptVisible(isVisible: boolean): void {
-	const inputRow = getInputRow();
-	inputRow.classList.toggle(styles.terminalInputRowHidden, !isVisible);
+	getInputRow().classList.toggle(styles.terminalInputRowHidden, !isVisible);
 }
 
 function setActivePrompt(options?: { isSudo?: boolean; isSu?: boolean }): void {
@@ -134,21 +165,24 @@ function scrollToBottom(): void {
 }
 
 function appendOutput(lines: OutputLine[]): void {
-	const output = getOutput();
-	const wrapper = document.createElement('div');
-	wrapper.className = styles.cmdOutput;
-	wrapper.innerHTML = renderLines(lines);
-	output.append(wrapper);
+	sessionEntries.push({ kind: 'output', lines });
+	renderSession();
 	scrollToBottom();
 }
 
-function appendPromptLine(command: string): HTMLElement {
+function appendPromptLine(command: string, label = promptLabel): void {
+	sessionEntries.push({ kind: 'prompt', label, command });
+	renderSession();
+	scrollToBottom();
+}
+
+function appendTemporaryPromptLine(): HTMLElement {
 	const output = getOutput();
 	const line = document.createElement('div');
 	line.className = `${styles.outLine} ${styles.promptLine}`;
 	line.innerHTML = [
 		`<span class="${styles.promptLabelText}">${promptLabel}</span>`,
-		`<span class="${styles.promptCommand}">${command}</span>`,
+		`<span class="${styles.promptCommand}"></span>`,
 	].join('');
 	output.append(line);
 	scrollToBottom();
@@ -186,7 +220,8 @@ function executeCommand(rawCommand: string, options: { addToHistory?: boolean } 
 	}
 
 	if (command === 'clear') {
-		getOutput().innerHTML = '';
+		sessionEntries = [];
+		renderSession();
 		return;
 	}
 
@@ -206,7 +241,7 @@ function executeCommand(rawCommand: string, options: { addToHistory?: boolean } 
 		const target = command.slice(2).trim() || '~';
 		appendOutput([
 			{ t: 'text', color: 'yellow', v: `cd: ${target}` },
-			{ t: 'text', color: 'muted', v: '  nice try. this terminal is immutable by design.' },
+			{ t: 'text', color: 'muted', v: { en: '  nice try. this terminal is immutable by design.', ua: '  гарна спроба. цей термінал навмисно незмінний.' } },
 		]);
 		return;
 	}
@@ -215,7 +250,7 @@ function executeCommand(rawCommand: string, options: { addToHistory?: boolean } 
 		const target = command.slice(2).trim();
 		appendOutput([
 			{ t: 'text', color: 'red', v: `rm: ${target}` },
-			{ t: 'text', color: 'muted', v: '  cannot delete: permissions not granted. try with sudo.' },
+			{ t: 'text', color: 'muted', v: { en: '  cannot delete: permissions not granted. try with sudo.', ua: '  не можу видалити: прав недостатньо. спробуй через sudo.' } },
 		]);
 		return;
 	}
@@ -242,18 +277,18 @@ function executeCommand(rawCommand: string, options: { addToHistory?: boolean } 
 function handleEnter(input: HTMLInputElement): void {
 	const value = input.value;
 	const command = value.trim();
-	if (!command && !pendingSudoCommand) {
+	if (!command && !pendingSudoCommand && !pendingSuUser) {
 		return;
 	}
 
 	input.value = '';
 
 	if (pendingSudoCommand) {
-		appendPromptLine(sudoPromptLabel);
+		appendPromptLine('', sudoPromptLabel);
 		appendOutput([
-			{ t: 'text', color: 'red', v: 'Sorry, try again.' },
-			{ t: 'text', color: 'muted', v: 'sudo: 1 incorrect password attempt' },
-			{ t: 'text', color: 'muted', v: 'This incident will be reported.' },
+			{ t: 'text', color: 'red', v: { en: 'Sorry, try again.', ua: 'Вибач, спробуй ще раз.' } },
+			{ t: 'text', color: 'muted', v: { en: 'sudo: 1 incorrect password attempt', ua: 'sudo: 1 невдала спроба пароля' } },
+			{ t: 'text', color: 'muted', v: { en: 'This incident will be reported.', ua: 'Про цей інцидент буде повідомлено.' } },
 		]);
 		pendingSudoCommand = null;
 		setActivePrompt();
@@ -261,10 +296,10 @@ function handleEnter(input: HTMLInputElement): void {
 	}
 
 	if (pendingSuUser) {
-		appendPromptLine(suPromptLabel);
+		appendPromptLine('', suPromptLabel);
 		appendOutput([
-			{ t: 'text', color: 'red', v: 'su: Authentication failure' },
-			{ t: 'text', color: 'muted', v: `su: incorrect password for ${pendingSuUser}` },
+			{ t: 'text', color: 'red', v: { en: 'su: Authentication failure', ua: 'su: помилка автентифікації' } },
+			{ t: 'text', color: 'muted', v: { en: `su: incorrect password for ${pendingSuUser}`, ua: `su: неправильний пароль для ${pendingSuUser}` } },
 		]);
 		pendingSuUser = null;
 		setActivePrompt();
@@ -342,7 +377,7 @@ async function typeAndRun(command: string): Promise<void> {
 	input.disabled = true;
 	setInteractivePromptVisible(false);
 
-	const promptLine = appendPromptLine('');
+	const promptLine = appendTemporaryPromptLine();
 	const promptCommand = promptLine.querySelector(`.${styles.promptCommand}`);
 	if (!(promptCommand instanceof HTMLElement)) {
 		isBusy = false;
@@ -358,6 +393,8 @@ async function typeAndRun(command: string): Promise<void> {
 	}
 
 	await sleep(180);
+	promptLine.remove();
+	appendPromptLine(command);
 	executeCommand(command);
 	input.disabled = false;
 	setInteractivePromptVisible(true);
@@ -386,9 +423,25 @@ async function boot(): Promise<void> {
 	isBusy = false;
 }
 
+function initLocale(): void {
+	const storedLocale = window.localStorage.getItem(localeStorageKey);
+	currentLocale = storedLocale === 'ua' ? 'ua' : DEFAULT_LOCALE;
+	syncLocaleUI();
+
+	getLocaleToggle()?.addEventListener('click', () => {
+		if (isBusy) {
+			return;
+		}
+
+		setLocale(currentLocale === 'en' ? 'ua' : 'en');
+	});
+}
+
 export function initTerminal(): void {
 	const input = getInput();
 	const output = getOutput();
+
+	initLocale();
 	setActivePrompt();
 
 	input.addEventListener('keydown', (event) => {
@@ -440,7 +493,7 @@ export function initTerminal(): void {
 
 	document.querySelector(`.${styles.terminalBody}`)?.addEventListener('click', (event) => {
 		const target = event.target as Element;
-		if (!target.closest('[data-cmd]') && !target.closest('a')) {
+		if (!target.closest('[data-cmd]') && !target.closest('a') && !target.closest('[data-locale-toggle]')) {
 			input.focus();
 		}
 	});

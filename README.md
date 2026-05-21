@@ -14,8 +14,9 @@ Single-page portfolio built with Astro and styled as an interactive terminal.
 - terminal UI with macOS-style window decorations
 - startup sequence that pre-renders `whoami`, `skills --list`, `projects --public`, and `contact`
 - command input with history, tab autocomplete, clickable commands, and `clear`
-- content managed from one file: `src/data/portfolio.ts`
-- mobile-friendly layout with pinned input row
+- EN/UA locale toggle in the header that retranslates existing terminal output
+- content managed from `src/data/portfolio.ts` with shared locale helpers in `src/data/i18n.ts`
+- mobile-friendly layout with inline terminal prompt
 
 ## Project Structure
 
@@ -29,11 +30,16 @@ src/
 │       ├── terminal.client.ts
 │       └── terminal.module.less
 ├── data/
-│   └── portfolio.ts
+│   ├── formatters.ts
+│   ├── i18n.ts
+│   ├── portfolio.ts
+│   └── types.ts
 ├── layouts/
 │   └── Base.astro
 ├── pages/
-│   └── index.astro
+│   ├── 404.astro
+│   ├── index.astro
+│   └── robots.txt.ts
 └── styles/
     ├── global.less
     ├── reset.less
@@ -56,6 +62,8 @@ Edit `src/data/portfolio.ts` to update:
 - skills and bar values
 - projects and drill-down content
 - contact links
+
+Localized text can be stored as plain strings or `{ en, ua }` objects. Commands stay in English; only the displayed content is translated.
 
 ## Notes
 

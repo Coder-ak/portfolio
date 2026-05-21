@@ -5,13 +5,22 @@ import styles from './terminal.module.less';
 ---
 
 <section class={styles.terminalWindow} role="application" aria-label="Terminal portfolio">
-	<header class={styles.terminalTitlebar} aria-hidden="true">
+	<header class={styles.terminalTitlebar}>
 		<div class={styles.terminalDots}>
 			<span class={`${styles.terminalDot} ${styles.terminalDotRed}`}></span>
 			<span class={`${styles.terminalDot} ${styles.terminalDotYellow}`}></span>
 			<span class={`${styles.terminalDot} ${styles.terminalDotGreen}`}></span>
 		</div>
 		<span class={styles.terminalTitle}>{profile.titleBar}</span>
+		<div class={styles.localeToggleWrap} id="locale-toggle-root" data-locale-toggle data-locale="en">
+			<span class={styles.localeLabel}>EN</span>
+			<button class={styles.localeToggle} id="locale-toggle" type="button" aria-label="Switch language to Ukrainian" aria-pressed="false">
+				<span class={styles.localeToggleTrack}>
+					<span class={styles.localeToggleThumb}></span>
+				</span>
+			</button>
+			<span class={styles.localeLabel}>UA</span>
+		</div>
 	</header>
 
 	<TerminalBody />

@@ -67,6 +67,87 @@
 	color: @color-text-muted;
 }
 
+.localeToggleWrap {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.localeLabel {
+	font-size: 11px;
+	color: @color-text-secondary;
+	transition: color @transition-fast;
+}
+
+.localeToggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.7;
+	}
+}
+
+.localeToggleTrack {
+	position: relative;
+	display: inline-flex;
+	width: 34px;
+	height: 20px;
+	padding: 2px;
+	border-radius: 999px;
+	background: fadeout(@color-text-muted, 30%);
+	box-shadow: inset 0 0 0 1px fadeout(@color-link, 78%);
+	transition:
+		background @transition-fast,
+		box-shadow @transition-fast;
+}
+
+.localeToggleThumb {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+	transform: translateX(0);
+	transition: transform @transition-fast;
+}
+
+.localeToggleWrap[data-locale='ua'] {
+	.localeLabel:last-child {
+		color: @color-text-primary;
+	}
+
+	.localeLabel:first-child {
+		color: @color-text-muted;
+	}
+
+	.localeToggleTrack {
+		background: @color-green;
+		box-shadow: inset 0 0 0 1px fadeout(@color-green, 50%);
+	}
+
+	.localeToggleThumb {
+		transform: translateX(14px);
+	}
+}
+
+.localeToggleWrap[data-locale='en'] {
+	.localeLabel:first-child {
+		color: @color-text-primary;
+	}
+
+	.localeLabel:last-child {
+		color: @color-text-muted;
+	}
+}
+
 .terminalBody {
 	flex: 1;
 	display: flex;

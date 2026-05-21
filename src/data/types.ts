@@ -1,21 +1,23 @@
 export type AccentColor = 'green' | 'blue' | 'yellow';
 export type LineColor = 'primary' | 'secondary' | 'muted' | 'green' | 'blue' | 'yellow' | 'red' | 'cyan';
+export type Locale = 'en' | 'ua';
+export type LocalizedText = string | Record<Locale, string>;
 
 export interface Profile {
 	handle: string;
 	host: string;
 	titleBar: string;
-	role: string;
-	experience: string;
-	location: string;
+	role: LocalizedText;
+	experience: LocalizedText;
+	location: LocalizedText;
 }
 
 export interface Skill {
 	id: string;
-	name: string;
+	name: LocalizedText;
 	fill: number;
 	color: AccentColor;
-	note?: string;
+	note?: LocalizedText;
 	since: number;
 	details?: OutputLine[];
 }
@@ -23,24 +25,25 @@ export interface Skill {
 export interface Project {
 	id: string;
 	commandLabel: string;
-	displayName: string;
-	tagline: string;
+	displayName: LocalizedText;
+	tagline: LocalizedText;
 	details: OutputLine[];
 	repo?: string;
 }
 
 export interface ContactLink {
-	label: string;
-	value: string;
+	label: LocalizedText;
+	value: LocalizedText;
 	href?: string;
 }
 
 export type OutputLine =
-	| { t: 'text'; color: LineColor; v: string }
+	| { t: 'text'; color: LineColor; v: LocalizedText }
 	| { t: 'gap' }
-	| { t: 'entry'; cmd: string; desc: string }
-	| { t: 'repo'; label?: string; text: string; color?: LineColor }
+	| { t: 'entry'; cmd: string; desc: LocalizedText }
+	| { t: 'repo'; label?: LocalizedText; text: string; color?: LineColor }
 	| { t: 'skill'; skill: Skill }
 	| { t: 'project'; project: Project }
 	| { t: 'contact'; contact: ContactLink }
+	| { t: 'contacts'; contacts: ContactLink[] }
 	| { t: 'raw'; html: string };

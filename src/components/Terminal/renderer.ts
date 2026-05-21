@@ -1,5 +1,6 @@
-import type { ContactLink, LineColor, OutputLine, Skill } from '../../data/types';
+import { resolveText } from '../../data/i18n';
 import { formatYearsSince } from '../../data/formatters';
+import type { ContactLink, LineColor, Locale, OutputLine, Skill } from '../../data/types';
 import styles from './terminal.module.less';
 
 const COLOR_CLASS: Record<LineColor, string> = {
@@ -35,16 +36,16 @@ function renderGauge(skill: Skill): string {
 	].join('');
 }
 
-function renderContact(contact: ContactLink): string {
+function renderContact(contact: ContactLink, locale: Locale): string {
 	if (contact.href) {
 		return [
 			`<a class="${styles.contactLink}" href="${escapeHtml(contact.href)}" target="_blank" rel="noreferrer noopener">`,
-			escapeHtml(contact.value),
+			escapeHtml(resolveText(contact.value, locale)),
 			'</a>',
 		].join('');
 	}
 
-	return `<span class="${styles.contactText}">${escapeHtml(contact.value)}</span>`;
+	return `<span class="${styles.contactText}">${escapeHtml(resolveText(contact.value, locale))}</span>`;
 }
 
 function toRepoHref(text: string): string {
@@ -59,32 +60,32 @@ function toRepoHref(text: string): string {
 	return text;
 }
 
-export function renderLines(lines: OutputLine[]): string {
+export function renderLines(lines: OutputLine[], locale: Locale): string {
 	return lines
 		.map((line) => {
 			switch (line.t) {
 				case 'gap':
 					return `<div class="${styles.outGap}"></div>`;
 				case 'text':
-					return `<div class="${styles.outLine} ${COLOR_CLASS[line.color]}">${escapeHtml(line.v)}</div>`;
+					return `<div class="${styles.outLine} ${COLOR_CLASS[line.color]}">${escapeHtml(resolveText(line.v, locale))}</div>`;
 				case 'entry':
 					return [
 						`<div class="${styles.outLine} ${styles.outEntry}">`,
 						`<span class="${styles.outLink}" data-cmd="${escapeHtml(line.cmd)}" tabindex="0" role="button">${escapeHtml(line.cmd)}</span>`,
-						`<span class="${styles.outSecondary}">${escapeHtml(line.desc)}</span>`,
+						`<span class="${styles.outSecondary}">${escapeHtml(resolveText(line.desc, locale))}</span>`,
 						'</div>',
 					].join('');
 				case 'repo':
 					return [
 						`<div class="${styles.outLine} ${COLOR_CLASS[line.color ?? 'secondary']}">`,
-						line.label ? `${escapeHtml(line.label)} ` : '',
+						line.label ? `${escapeHtml(resolveText(line.label, locale))} ` : '',
 						`<a class="${styles.outLink}" href="${escapeHtml(toRepoHref(line.text))}" target="_blank" rel="noreferrer noopener">${escapeHtml(line.text)}</a>`,
 						'</div>',
 					].join('');
 				case 'skill':
 					return [
 						`<div class="${styles.outLine} ${styles.outSkill}">`,
-						`<span class="${styles.skillCommand}" data-cmd="${escapeHtml(line.skill.id)}" tabindex="0" role="button">${escapeHtml(line.skill.name)}</span>`,
+						`<span class="${styles.skillCommand}" data-cmd="${escapeHtml(line.skill.id)}" tabindex="0" role="button">${escapeHtml(resolveText(line.skill.name, locale))}</span>`,
 						renderGauge(line.skill),
 						`<span class="${styles.skillYears}">${escapeHtml(formatYearsSince(line.skill.since))}</span>`,
 						'</div>',
@@ -92,9 +93,9 @@ export function renderLines(lines: OutputLine[]): string {
 				case 'project':
 					{
 						const titleText =
-							line.project.displayName === line.project.commandLabel
-								? ` — ${escapeHtml(line.project.tagline)}`
-								: ` — ${escapeHtml(line.project.displayName)} · ${escapeHtml(line.project.tagline)}`;
+							resolveText(line.project.displayName, locale) === line.project.commandLabel
+								? ` — ${escapeHtml(resolveText(line.project.tagline, locale))}`
+								: ` — ${escapeHtml(resolveText(line.project.displayName, locale))} · ${escapeHtml(resolveText(line.project.tagline, locale))}`;
 
 					return [
 						`<div class="${styles.outLine} ${styles.outProject}">`,
@@ -105,7 +106,18 @@ export function renderLines(lines: OutputLine[]): string {
 					].join('');
 					}
 				case 'contact':
-					return renderContact(line.contact);
+					return renderContact(line.contact, locale);
+				case 'contacts':
+					return [
+						`<div class="${styles.outLine} ${styles.contactRow}">`,
+						line.contacts
+							.map((contact, index) => {
+								const separator = index === 0 ? '' : `<span class="${styles.outSecondary}"> / </span>`;
+								return `${separator}${renderContact(contact, locale)}`;
+							})
+							.join(''),
+						'</div>',
+					].join('');
 				case 'raw':
 					return line.html;
 				default:
