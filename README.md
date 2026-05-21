@@ -59,7 +59,7 @@ Edit `src/data/portfolio.ts` to update:
 
 ## Notes
 
-- set `siteUrl` in `src/data/seo.ts` to enable canonical URLs and a sitemap reference in `robots.txt`
+- set `siteUrl` in `src/data/seo.ts` when you know the production domain to enable canonical and full social URL metadata
 
 ## License
 
