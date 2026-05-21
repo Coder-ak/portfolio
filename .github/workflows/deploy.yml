@@ -25,11 +25,12 @@ jobs:
         run: npm run build
 
       - name: Deploy to VPS via rsync
-        uses: easingthemes/ssh-deploy@v5
+        uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           ARGS: "-rlgoDzvc --delete"
           SOURCE: "dist/"
           REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_PORT }}
           REMOTE_USER: ${{ secrets.DEPLOY_USER }}
           TARGET: /var/www/portfolio
