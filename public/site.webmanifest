@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "coder@portfolio",
+  "short_name": "coder@portfolio",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
